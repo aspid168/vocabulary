@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -20,20 +21,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<String> elements = new LinkedList<>();
-    private List<Boolean> state_1 = new LinkedList<>();
+    public  int elements;
+    String element_from_db = "";
 
-    public AlertDialog.Builder builder;
     public Context mcontext;
     public Database_SQL databaseSql;
     public AdapterForElements(Context context) {
         mcontext = context;
         databaseSql = new Database_SQL(mcontext);
-        builder =  new AlertDialog.Builder(mcontext);
-        builder.setCancelable(true);
         Cursor res = databaseSql.getElementData();
         while (res.moveToNext()){
-            elements.add(res.getInt(0), res.getString(1));
+            elements = (res.getInt(0)) + 1;
         }
     }
 
@@ -54,7 +52,6 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
             elem_edit = itemView.findViewById(R.id.edit);
             elem_text = itemView.findViewById(R.id.text);
             elem_delete = itemView.findViewById(R.id.delete);
-
         }
 
     }
@@ -95,32 +92,35 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
             final TextView e_edit = ((ElementsViewHolder) holder).elem_edit;
             final TextView e_text = ((ElementsViewHolder) holder).elem_text;
             final ImageButton e_delete = ((ElementsViewHolder) holder).elem_delete;
-//            String element_from_db = "";
-//            Cursor res = databaseSql.getElementData();
-//            while (res.moveToNext()){
-//                if(Integer.parseInt(res.getString(0)) == position ){
-//                    element_from_db = res.getString(1);
-//                }
-//            }
+            element_from_db = "";
+            boolean state_1 = true;
+            Cursor res = databaseSql.getElementData();
+            while (res.moveToNext()){
+                if(Integer.parseInt(res.getString(0)) == position ){
+                    element_from_db = res.getString(1);
+                    int bol = res.getInt(4);
+                    if(bol != 1)
+                        state_1 = false;
+                }
+            }
 
-//            if (state_1.get(position)) {
-//                e_edit.setText(element_from_db);
-//                e_text.setVisibility(View.GONE);
-//                e_edit.setVisibility(View.VISIBLE);
-//                e_delete.setVisibility(View.VISIBLE);
-//            } else {
-//                e_text.setText(element_from_db);
-//                e_edit.setVisibility(View.GONE);
-//                e_text.setVisibility(View.VISIBLE);
-//                e_delete.setVisibility(View.GONE);
-//            }
+            if (state_1) {
+                e_edit.setText(element_from_db);
+                e_text.setVisibility(View.GONE);
+                e_edit.setVisibility(View.VISIBLE);
+                e_delete.setVisibility(View.VISIBLE);
+            } else {
+                e_text.setText(element_from_db);
+                e_edit.setVisibility(View.GONE);
+                e_text.setVisibility(View.VISIBLE);
+                e_delete.setVisibility(View.GONE);
+            }
 
             e_text.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    elements.clear();
-                    state_1.clear();
+                    elements = 0;
                     notifyDataSetChanged();
                     st = false;
                 }
@@ -129,11 +129,8 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
             e_edit.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-//                    databaseSql.deleteData();
-//                    builder.setMessage(element_from_db);
-//                    builder.show();
-                    state_1.set(position, false);
-//                    e_text.setText(elements.get(position));
+                    databaseSql.updateElementState(Integer.toString(position), false);
+                    e_text.setText(e_edit.getText());
                     e_edit.setVisibility(View.GONE);
                     e_text.setVisibility(View.VISIBLE);
                     e_delete.setVisibility(View.GONE);
@@ -144,8 +141,8 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
             e_text.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    state_1.set(position, true);
-//                    e_edit.setText(elements.get(position));
+                    databaseSql.updateElementState(Integer.toString(position), true);
+                    e_edit.setText(e_text.getText());
                     e_text.setVisibility(View.GONE);
                     e_edit.setVisibility(View.VISIBLE);
                     e_delete.setVisibility(View.VISIBLE);
@@ -156,15 +153,8 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
             e_delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    databaseSql.deleteData();
-                    try {
-                        elements.remove(position);
-                        state_1.remove(position);
-                    }catch (IndexOutOfBoundsException ignored){
-
-                    }
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position, elements.size());
+                    elements = elements - 1;
+                    
                 }
             });
 
@@ -176,20 +166,16 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if (elements.size() > position)
+                    if (elements > position)
                     {
-//                        elements.set(position, s.toString());
                         if(databaseSql.insertElement(Integer.toString(position), s.toString()))
                         {
 
                         }
-                        else
+                        else{
                             databaseSql.updateElement(Integer.toString(position), s.toString());
 
-//                        if (!elements.get(position).equals("") && elements.size() == position + 1)
-//                            ((MainActivity)mcontext).buttonVisibilityForElements(true);
-//                        else
-//                            ((MainActivity)mcontext).buttonVisibilityForElements(false);
+                        }
                     }
                 }
 
@@ -356,7 +342,7 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public int getItemCount() {
         if (st)
-            return elements.size();
+            return elements;
         else
             return collections.size();
     }
@@ -364,9 +350,8 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void add(){
 
         if (st) {
-            elements.add("");
-            state_1.add(true);
-            notifyItemInserted(elements.size() - 1);
+            elements = elements + 1;
+            notifyItemInserted(elements - 1);
 
         }
         else{

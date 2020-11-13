@@ -17,8 +17,8 @@ public class Database_SQL extends SQLiteOpenHelper {
     public static final String COL_2 = "collection";
     public static final String COL_3 = "word";
     public static final String COL_4 = "translation";
-    public static final String COL_5 = "statement_for_w";
-    public static final String COL_6 = "statement_for_t";
+    public static final String COL_5 = "statement_for_elem";
+    public static final String COL_6 = "statement_for_coll";
 
     public Database_SQL(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -27,7 +27,7 @@ public class Database_SQL extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + TABLE_NAME +"(id INTEGER PRIMARY KEY AUTOINCREMENT, collection STRING, word STRING, translation STRING, statement_for_w BOOLEAN, statement_for_t BOOLEAN)");
+        db.execSQL("create table " + TABLE_NAME +"(id INTEGER PRIMARY KEY AUTOINCREMENT, collection STRING, word STRING, translation STRING, statement_for_elem BOOLEAN, statement_for_coll BOOLEAN)");
     }
 
     @Override
@@ -41,8 +41,8 @@ public class Database_SQL extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, collection);
-
-        long result = db.insert(TABLE_NAME, COL_1 + COL_2, contentValues);
+        contentValues.put(COL_5, true);
+        long result = db.insert(TABLE_NAME, COL_1 + COL_2 + COL_5, contentValues);
         if (result == -1)
             return false;
         else
@@ -54,6 +54,13 @@ public class Database_SQL extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, collection);
+        db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
+    }
+    public void updateElementState(String id, Boolean state){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_1, id);
+        contentValues.put(COL_5, state);
         db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
     public void insertCollection(String id, String word, String translation, Boolean statement_for_w, Boolean statement_for_t){
