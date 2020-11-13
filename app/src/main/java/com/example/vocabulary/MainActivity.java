@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity{
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 if (btnviselememt || adapterForElements.getItemCount() == 0 || (btnviswords && btnvistranslation)){
-                    buttonVisibilityForElements(false);
+                    buttonVisibilityForElements(true);//false
                     buttonVisibilityForWords(false);
                     buttonVisibilityForTranslation(false);
                     adapterForElements.add();
