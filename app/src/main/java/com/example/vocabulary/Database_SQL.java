@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.GregorianCalendar;
 
@@ -56,6 +57,7 @@ public class Database_SQL extends SQLiteOpenHelper {
         contentValues.put(COL_2, collection);
         db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
+
     public void updateElementState(String id, Boolean state){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -63,6 +65,31 @@ public class Database_SQL extends SQLiteOpenHelper {
         contentValues.put(COL_5, state);
         db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
+
+    public void deleteElement(String id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
+        db.delete(TABLE_NAME, "id = ?", new String[]{id});
+        int Id = Integer.parseInt(id) - 1;
+        cursor.move(Integer.parseInt(id));
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_1, Integer.toString(Id));
+        db.update(TABLE_NAME,contentValues, COL_1 + "= ?", new String[]{Integer.toString(Id)});
+        while (cursor.moveToNext())
+        {
+            Id = Id + 1;
+            contentValues = new ContentValues();
+            contentValues.put(COL_1, Integer.toString(Id));
+            db.update(TABLE_NAME,contentValues, COL_1 + "= ?", new String[]{Integer.toString(Id + 1)});
+        }
+    }
+
+    public Cursor getElementData(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
+        return res;
+    }
+
     public void insertCollection(String id, String word, String translation, Boolean statement_for_w, Boolean statement_for_t){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
@@ -77,12 +104,5 @@ public class Database_SQL extends SQLiteOpenHelper {
     public Integer deleteData(){
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_NAME, null, new String[]{});
-    }
-
-    public Cursor getElementData(){
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
-//        Cursor res = db.rawQuery(TABLE_NAME, new String[]{COL_1, COL_2});
-        return res;
     }
 }

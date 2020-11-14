@@ -154,7 +154,9 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void onClick(View v) {
                     elements = elements - 1;
-                    
+                    databaseSql.deleteElement(Integer.toString(position));
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, elements);
                 }
             });
 
