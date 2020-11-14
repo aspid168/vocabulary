@@ -11,24 +11,20 @@ import java.util.GregorianCalendar;
 
 import androidx.annotation.Nullable;
 
-public class Database_SQL extends SQLiteOpenHelper {
-    public static final String DATABASE_NAME = "Vocabulary.db";
-    public static final String TABLE_NAME = "Vocabulary_table";
+public class ElementDatabase_SQL extends SQLiteOpenHelper {
+    public static final String DATABASE_NAME = "Elements.db";
+    public static final String TABLE_NAME = "Elements_table";
     public static final String COL_1 = "id";
     public static final String COL_2 = "collection";
-    public static final String COL_3 = "word";
-    public static final String COL_4 = "translation";
-    public static final String COL_5 = "statement_for_elem";
-    public static final String COL_6 = "statement_for_coll";
+    public static final String COL_3 = "statement";
 
-    public Database_SQL(@Nullable Context context) {
+    public ElementDatabase_SQL(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
-//        SQLiteDatabase db = this.getWritableDatabase();
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + TABLE_NAME +"(id INTEGER PRIMARY KEY AUTOINCREMENT, collection STRING, word STRING, translation STRING, statement_for_elem BOOLEAN, statement_for_coll BOOLEAN)");
+        db.execSQL("create table " + TABLE_NAME +"(id INTEGER PRIMARY KEY AUTOINCREMENT, collection STRING, statement BOOLEAN)");
     }
 
     @Override
@@ -37,13 +33,13 @@ public class Database_SQL extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertElement(String id, String collection){
+    public boolean insertElement(String id, String element){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
-        contentValues.put(COL_2, collection);
-        contentValues.put(COL_5, true);
-        long result = db.insert(TABLE_NAME, COL_1 + COL_2 + COL_5, contentValues);
+        contentValues.put(COL_2, element);
+        contentValues.put(COL_3, true);
+        long result = db.insert(TABLE_NAME, COL_1 + COL_2 + COL_3, contentValues);
         if (result == -1)
             return false;
         else
@@ -55,15 +51,15 @@ public class Database_SQL extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, collection);
-        db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
+        db.update(TABLE_NAME, contentValues, COL_1 + " = ?", new String[]{id});
     }
 
     public void updateElementState(String id, Boolean state){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
-        contentValues.put(COL_5, state);
-        db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
+        contentValues.put(COL_3, state);
+        db.update(TABLE_NAME, contentValues, COL_1 + " = ?", new String[]{id});
     }
 
     public void deleteElement(String id){
@@ -90,16 +86,7 @@ public class Database_SQL extends SQLiteOpenHelper {
         return res;
     }
 
-    public void insertCollection(String id, String word, String translation, Boolean statement_for_w, Boolean statement_for_t){
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_1, id);
-        contentValues.put(COL_3, word);
-        contentValues.put(COL_4, translation);
-        contentValues.put(COL_5, statement_for_w);
-        contentValues.put(COL_6, statement_for_t);
-        db.update(TABLE_NAME, contentValues, "id = ?", new String[] {id});
-    }
+//todo delete in final version
 
     public Integer deleteData(){
         SQLiteDatabase db = this.getWritableDatabase();

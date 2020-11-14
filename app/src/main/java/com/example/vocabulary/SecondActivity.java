@@ -1,24 +1,23 @@
 package com.example.vocabulary;
+
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MainActivity extends AppCompatActivity{
+public class SecondActivity extends AppCompatActivity {
     private FloatingActionButton addButton;
     private RecyclerView recyclerViewForElements;
-    private AdapterForElements adapterForElements;
+    private AdapterForCollections adapterForCollections;
+
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_page);
         addButton = findViewById(R.id.add_button);
@@ -26,11 +25,11 @@ public class MainActivity extends AppCompatActivity{
         recyclerViewForElements.setHasFixedSize(true);
         recyclerViewForElements.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewForElements.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-        adapterForElements = new AdapterForElements(this);
-        recyclerViewForElements.setAdapter(adapterForElements);
+        adapterForCollections = new AdapterForCollections(this);
+        recyclerViewForElements.setAdapter(adapterForCollections);
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                    adapterForElements.add();
+                adapterForCollections.add();
             }
         });
     }
