@@ -1,15 +1,18 @@
 package com.example.vocabulary;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,20 +21,63 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public  int elements;
-    String word = "";
-    String translation = "";
+    public int pos;
+    public List<String> words = new LinkedList<>();
+    public List<String> translations = new LinkedList<>();
     private List<Words> collections = new LinkedList<>();
     public Context mcontext;
     public CollectionDatabase_SQL databaseSql;
 
-    public AdapterForCollections(Context context) {
+    public AdapterForCollections(Context context, int pos) {
+        this.pos = pos;
         mcontext = context;
         databaseSql = new CollectionDatabase_SQL(mcontext);
         Cursor res = databaseSql.getElementData();
-        while (res.moveToNext()){
-            elements = (res.getInt(0)) + 1;
+        databaseSql.getWordsList(words, pos);
+        databaseSql.getTranslationList(translations, pos);
+        //todo change
+//        databaseSql.deleteData();
+        while (res.moveToNext()) {
+              elements = (res.getInt(0)) + 1;
         }
+
+//        word = "";
+//        translation = "";
+//        words.add("");
+//        translations.add("");
+//        while (res.moveToNext()) {
+//            elements = (res.getInt(0)) + 1;
+//            if (Integer.parseInt(res.getString(0)) == pos) {
+//                word = res.getString(1);
+//                int w = 0;
+////                Log.v("QQQQQQQQQQQQQQQQQQQQQQ1", word + " " + word.toCharArray() + " " + words);
+//                for (char letter : word.toCharArray()) {
+////                    Log.v("QQQQQQQQQQQQQQQQQQQQQQ2", w + " " + Arrays.toString(word.toCharArray()) + " " + words);
+//                    if (letter == ' ') {
+//                        w = w + 1;
+//                        words.add("");
+//                    } else
+//                        words.set(w, words.get(w) + letter);
+//
+//                }
+//                int t = 0;
+//                translation = res.getString(2);
+//                Log.v("QQQQQQQQQQQQQQQQQQQQQQ1", translation + " " + translation.toCharArray() + " " + translations);
+//                for (char letter : translation.toCharArray()) {
+//                    Log.v("QQQQQQQQQQQQQQQQQQQQQQ2", t + " " + Arrays.toString(translation.toCharArray()) + " " + translations);
+//                    if (letter == ' ') {
+//                        t = t + 1;
+//                        translations.add("");
+//                    } else
+//                        translations.set(t, translations.get(t) + letter);
+//
+//                }
+//
+//
+//            }
+//        }
     }
+
 
     static class CollectionsViewHolder extends RecyclerView.ViewHolder{
         private TextView word;
@@ -63,30 +109,32 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         final TextView textView_w_invisible = ((CollectionsViewHolder)holder).word_invisible;
         final TextView textView_t_invisible = ((CollectionsViewHolder)holder).translation_invisible;
         final ImageButton delete = ((CollectionsViewHolder)holder).delete;
-        word = "";
-        translation = "";
+        if (words.size() == 0) {
+            words.add("");
+            databaseSql.insertWord("0", "");
+        }
+        if(translations.size() == 0){
+            translations.add("");
+            databaseSql.insertTranslation("0", "");
+        }
         boolean state = true;
         Cursor res = databaseSql.getElementData();
-        while (res.moveToNext()){
-            if(Integer.parseInt(res.getString(0)) == position ){
-                word = res.getString(1);
-                translation = res.getString(2);
-                int bol = res.getInt(3);
-                if(bol != 1)
-                    state = false;
-            }
+        while (res.moveToNext()) {
+            int bol = res.getInt(3);
+            if (bol != 1)
+                state = false;
         }
         if (state) {
-            textView_w.setText(word);
-            textView_t.setText(translation);
+            textView_w.setText(words.get(position));
+            textView_t.setText(translations.get(position));
             textView_w_invisible.setVisibility(View.GONE);
             textView_t_invisible.setVisibility(View.GONE);
             textView_w.setVisibility(View.VISIBLE);
             textView_t.setVisibility(View.VISIBLE);
             delete.setVisibility(View.VISIBLE);
         } else {
-            textView_w_invisible.setText(word);
-            textView_t_invisible.setText(translation);
+            textView_w_invisible.setText(words.get(position));
+            textView_t_invisible.setText(translations.get(position));
             textView_w.setVisibility(View.GONE);
             textView_t.setVisibility(View.GONE);
             textView_w_invisible.setVisibility(View.VISIBLE);
@@ -155,12 +203,13 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                elements = elements - 1;
-                databaseSql.deleteCollection(Integer.toString(position));
-                if(elements == 0)
-                    databaseSql.deleteData();
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, collections.size());
+                databaseSql.deleteData();
+//                elements = elements - 1;
+//                databaseSql.deleteCollection(Integer.toString(position));
+//                if(elements == 0)
+//                    databaseSql.deleteData();
+//                notifyItemRemoved(position);
+//                notifyItemRangeChanged(position, collections.size());
             }
         });
 
@@ -173,16 +222,7 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (elements > position)
-                {
-                    if(databaseSql.insertWord(Integer.toString(position), s.toString()))
-                    {
-
-                    }
-                    else{
-                        databaseSql.updateWord(Integer.toString(position), s.toString());
-
-                    }
-                }
+                    databaseSql.updateWord(Integer.toString(pos), s.toString());
             }
 
             @Override
@@ -199,14 +239,8 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(databaseSql.insertTranslation(Integer.toString(position), s.toString()))
-                {
-
-                }
-                else{
+                if (elements > position)
                     databaseSql.updateTranslation(Integer.toString(position), s.toString());
-
-                }
             }
 
             @Override
@@ -217,14 +251,17 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         });
 
     }
-
+//todo fix updates collections and do smth with words and translation lists
     public void add(){
+        words.add("");
+        translations.add("");
+        notifyItemInserted(elements);
         elements = elements + 1;
-        notifyItemInserted(elements - 1);
     }
+
     @Override
     public int getItemCount() {
-        return elements;
+        return words.size();
     }
     @Override
     public int getItemViewType(int position) {

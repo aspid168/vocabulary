@@ -80,7 +80,7 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mcontext, SecondActivity.class);
-//                intent.putExtra("element", position);
+                intent.putExtra("element", position);
                 mcontext.startActivity(intent);
             }
         });
@@ -129,17 +129,7 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (elements > position)
-                {
-                    if(databaseSql.insertElement(Integer.toString(position), s.toString()))
-                    {
-
-                    }
-                    else{
-                        databaseSql.updateElement(Integer.toString(position), s.toString());
-
-                    }
-                }
+                databaseSql.updateElement(Integer.toString(position), s.toString());
             }
 
             @Override
@@ -151,8 +141,9 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public void add(){
+        databaseSql.insertElement(Integer.toString(elements), "");
+        notifyItemInserted(elements);
         elements = elements + 1;
-        notifyItemInserted(elements - 1);
     }
 
     @Override

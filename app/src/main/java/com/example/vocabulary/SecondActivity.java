@@ -1,6 +1,8 @@
 package com.example.vocabulary;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -19,13 +21,15 @@ public class SecondActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        int element = intent.getIntExtra("element", -1);
         setContentView(R.layout.main_page);
         addButton = findViewById(R.id.add_button);
         recyclerViewForElements = findViewById(R.id.recyclerViewForCollections);
         recyclerViewForElements.setHasFixedSize(true);
         recyclerViewForElements.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewForElements.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-        adapterForCollections = new AdapterForCollections(this);
+        adapterForCollections = new AdapterForCollections(this, element);
         recyclerViewForElements.setAdapter(adapterForCollections);
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {

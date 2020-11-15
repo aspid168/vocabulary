@@ -33,17 +33,13 @@ public class ElementDatabase_SQL extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertElement(String id, String element){
+    public void insertElement(String id, String element){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, element);
         contentValues.put(COL_3, true);
-        long result = db.insert(TABLE_NAME, COL_1 + COL_2 + COL_3, contentValues);
-        if (result == -1)
-            return false;
-        else
-            return true;
+        db.insert(TABLE_NAME, COL_1 + COL_2 + COL_3, contentValues);
     }
 
     public void updateElement(String id, String collection){
