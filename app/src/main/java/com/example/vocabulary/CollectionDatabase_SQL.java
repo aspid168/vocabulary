@@ -11,7 +11,9 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
 
 import static android.util.Log.v;
@@ -23,7 +25,6 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
     public static final String COL_1 = "id";
     public static final String COL_2 = "word";
     public static final String COL_3 = "translation";
-    public static final String COL_4 = "statement";
 
     public CollectionDatabase_SQL(@Nullable Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -31,7 +32,7 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + TABLE_NAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT, word STRING, translation STRING, statement BOOLEAN)");
+        db.execSQL("create table " + TABLE_NAME + "(id INTEGER PRIMARY KEY AUTOINCREMENT, word STRING, translation STRING)");
     }
 
     @Override
@@ -45,40 +46,52 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, word);
-        contentValues.put(COL_4, true);
-        db.insert(TABLE_NAME, COL_1 + COL_2 + COL_4, contentValues);
+        contentValues.put(COL_3, "");
+        db.insert(TABLE_NAME, COL_1 + COL_2, contentValues);
     }
 
-    public void insertTranslation(String id, String translation) {
+    public void updateWord(String id, String word, int position) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_1, id);
-        contentValues.put(COL_3, translation);
-        contentValues.put(COL_4, true);
-        db.insert(TABLE_NAME, COL_1 + COL_3 + COL_4, contentValues);
-    }
-
-    public void updateWord(String id, String word) {
-        SQLiteDatabase db = this.getWritableDatabase();
+        List<String> words = new LinkedList<>();
+        words = getWordsList(words, Integer.parseInt(id));
+        if (words.size() <= position){
+            words.add(word);
+            insertWord(id, "");
+        }
+        else
+            words.set(position, word);
+        word = "";
+        for(String i : words){
+            if(word.equals(""))
+                word = word + i;
+            else
+                word = word + " " + i;
+        }
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_2, word);
         db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
 
-    public void updateTranslation(String id, String translation) {
+    public void updateTranslation(String id, String translation, int position) {
         SQLiteDatabase db = this.getWritableDatabase();
+        List<String> translations = new LinkedList<>();
+        translations = getTranslationList(translations, Integer.parseInt(id));
+        if(translations.size() <= position){
+            translations.add(translation);
+        }
+        else
+            translations.set(position, translation);
+        translation = "";
+        for(String i : translations){
+            if(translation.equals(""))
+                translation = translation + i;
+            else
+                translation = translation + " " + i;
+        }
         ContentValues contentValues = new ContentValues();
         contentValues.put(COL_1, id);
         contentValues.put(COL_3, translation);
-        db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
-    }
-
-    public void updateCollectionState(String id, Boolean state) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_1, id);
-        contentValues.put(COL_4, state);
         db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
 
@@ -99,23 +112,19 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
         }
     }
 
-    public Cursor getElementData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
-        return res;
-    }
-
     public Integer deleteData() {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_NAME, null, new String[]{});
     }
 
     public List<String> getWordsList(List<String> words, int pos) {
-        Cursor res = getElementData();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
         String word;
         while (res.moveToNext()) {
             if (Integer.parseInt(res.getString(0)) == pos) {
                 word = res.getString(1);
+                words.add("");
                 int w = 0;
                 for (char letter : word.toCharArray()) {
                     if (letter == ' ') {
@@ -128,32 +137,24 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
         }
         return words;
     }
-//        Log.v("qqq", res.getString(1) + "");
-//        if(res.getCount() != 1) {
-//        else {
-//        }
-//    }
+
     public List<String> getTranslationList(List<String> translations, int pos) {
-        Cursor res = getElementData();
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor res = db.rawQuery("select * from " + TABLE_NAME, null);
         String translation;
-        if(res.getCount() != 1) {
-            while (res.moveToNext()) {
-                if (Integer.parseInt(res.getString(0)) == pos) {
-                    int t = 0;
-                    translation = res.getString(2);
-                    for (char letter : translation.toCharArray()) {
-                        if (letter == ' ') {
-                            t = t + 1;
-                            translations.add("");
-                        } else
-                            translations.set(t, translations.get(t) + letter);
-                    }
+        while (res.moveToNext()) {
+            if (Integer.parseInt(res.getString(0)) == pos) {
+                translation = res.getString(2);
+                translations.add("");
+                int t = 0;
+                for (char letter : translation.toCharArray()) {
+                    if (letter == ' ') {
+                        t = t + 1;
+                        translations.add("");
+                    } else
+                        translations.set(t, translations.get(t) + letter);
                 }
             }
-        }
-        else {
-//            translations.add("");
-//            insertTranslation(Integer.toString(0), "");
         }
         return translations;
     }
