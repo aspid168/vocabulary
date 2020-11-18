@@ -1,19 +1,12 @@
 package com.example.vocabulary;
 
 import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,7 +24,6 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
 
 
     public AdapterForCollections(Context context, int pos) {
-
         this.pos = pos;
         mcontext = context;
         databaseSql = new CollectionDatabase_SQL(mcontext);
@@ -48,7 +40,6 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         while (statement_add.size() < words.size())
             statement_add.add(true);
     }
-
 
     static class CollectionsViewHolder extends RecyclerView.ViewHolder{
         private TextView word;
@@ -80,7 +71,6 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         final TextView textView_w_invisible = ((CollectionsViewHolder)holder).word_invisible;
         final TextView textView_t_invisible = ((CollectionsViewHolder)holder).translation_invisible;
         final ImageButton delete = ((CollectionsViewHolder)holder).delete;
-        Log.v("qwe", state + "state//words" + words + "words//trans" + translations + "trans//pos" + position + "pos//size" + words.size());
         if (state.get(position)) {
             textView_w.setText(words.get(position));
             textView_t.setText(translations.get(position));
@@ -218,6 +208,7 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
     public int getItemCount() {
         return words.size();
     }
+
     @Override
     public int getItemViewType(int position) {
         return position;

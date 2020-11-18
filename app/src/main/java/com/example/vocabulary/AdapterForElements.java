@@ -9,6 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.LinkedList;
+import java.util.List;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +22,7 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
     String element_from_db = "";
     public Context mcontext;
     public ElementDatabase_SQL databaseSql;
+    public CollectionDatabase_SQL collectionDatabaseSql;
 
     public AdapterForElements(Context context) {
         mcontext = context;
@@ -25,6 +31,7 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
         while (res.moveToNext()){
             elements = (res.getInt(0)) + 1;
         }
+        collectionDatabaseSql = new CollectionDatabase_SQL(mcontext);
     }
 
     static class ElementsViewHolder extends RecyclerView.ViewHolder {
@@ -88,11 +95,18 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
         e_edit.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                databaseSql.updateElementState(Integer.toString(position), false);
-                e_text.setText(e_edit.getText().toString());
-                e_edit.setVisibility(View.GONE);
-                e_text.setVisibility(View.VISIBLE);
-                e_delete.setVisibility(View.GONE);
+                if(!e_edit.getText().toString().isEmpty()){
+                    databaseSql.updateElement(Integer.toString(position), e_edit.getText().toString());
+                    databaseSql.updateElementState(Integer.toString(position), false);
+                    e_text.setText(e_edit.getText().toString());
+                    e_edit.setVisibility(View.GONE);
+                    e_text.setVisibility(View.VISIBLE);
+                    e_delete.setVisibility(View.GONE);
+                }
+                else{
+                    Toast warning = Toast.makeText(mcontext, "Please enter text", Toast.LENGTH_SHORT);
+                    warning.show();
+                }
                 return true;
             }
         });
@@ -116,6 +130,7 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
                 if(elements == 0)
                     databaseSql.deleteData();
                 databaseSql.deleteElement(Integer.toString(position));
+                collectionDatabaseSql.deleteCollection(Integer.toString(position), 0);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, elements);
             }

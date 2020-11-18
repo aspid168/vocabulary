@@ -1,10 +1,6 @@
 package com.example.vocabulary;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 

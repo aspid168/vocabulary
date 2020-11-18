@@ -5,18 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
-
-import androidx.annotation.IntRange;
 import androidx.annotation.Nullable;
-
-import static android.util.Log.v;
 
 public class CollectionDatabase_SQL extends SQLiteOpenHelper {
 
@@ -97,43 +88,56 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
 
     public void deleteCollection(String id, int position) {
         SQLiteDatabase db = this.getWritableDatabase();
-        List<String> translations = new LinkedList<>();
-        List<String> words = new LinkedList<>();
-        translations = getTranslationList(translations, Integer.parseInt(id));
-        words = getWordsList(words, Integer.parseInt(id));
-        String translation = "";
-        String word = "";
-        if(words.size() <= position)
-            words.add(word);
-        if(translations.size() <= position)
-            translations.add(translation);
-        words.remove(position);
-        translations.remove(position);
-        for(String i : translations){
-            if(translation.equals(""))
-                translation = translation + i;
-            else
-                translation = translation + " " + i;
-        }
-        for(String i : words){
-            if(word.equals(""))
-                word = word + i;
-            else
-                word = word + " " + i;
-        }
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_1, id);
-        contentValues.put(COL_2, word);
-        contentValues.put(COL_3, translation);
-        if(word.equals("") || translation.equals(""))
+        if (position == 0){
+            Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
             db.delete(TABLE_NAME, "id = ?", new String[]{id});
-        else
-            db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
-    }
-
-    public Integer deleteData() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(TABLE_NAME, null, new String[]{});
+            int Id = Integer.parseInt(id) - 1;
+            cursor.move(Integer.parseInt(id));
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(COL_1, Integer.toString(Id));
+            db.update(TABLE_NAME,contentValues, COL_1 + "= ?", new String[]{Integer.toString(Id)});
+            while (cursor.moveToNext())
+            {
+                Id = Id + 1;
+                contentValues = new ContentValues();
+                contentValues.put(COL_1, Integer.toString(Id));
+                db.update(TABLE_NAME,contentValues, COL_1 + "= ?", new String[]{Integer.toString(Id + 1)});
+            }
+        }
+        else {
+            List<String> translations = new LinkedList<>();
+            List<String> words = new LinkedList<>();
+            translations = getTranslationList(translations, Integer.parseInt(id));
+            words = getWordsList(words, Integer.parseInt(id));
+            String translation = "";
+            String word = "";
+            if (words.size() <= position)
+                words.add(word);
+            if (translations.size() <= position)
+                translations.add(translation);
+            words.remove(position);
+            translations.remove(position);
+            for (String i : translations) {
+                if (translation.equals(""))
+                    translation = translation + i;
+                else
+                    translation = translation + " " + i;
+            }
+            for (String i : words) {
+                if (word.equals(""))
+                    word = word + i;
+                else
+                    word = word + " " + i;
+            }
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(COL_1, id);
+            contentValues.put(COL_2, word);
+            contentValues.put(COL_3, translation);
+            if (word.equals("") || translation.equals(""))
+                db.delete(TABLE_NAME, "id = ?", new String[]{id});
+            else
+                db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
+        }
     }
 
     public List<String> getWordsList(List<String> words, int pos) {

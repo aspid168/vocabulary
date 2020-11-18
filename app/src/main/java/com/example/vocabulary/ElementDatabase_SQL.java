@@ -5,9 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-
-import java.util.GregorianCalendar;
 
 import androidx.annotation.Nullable;
 
@@ -82,10 +79,9 @@ public class ElementDatabase_SQL extends SQLiteOpenHelper {
         return res;
     }
 
-//todo delete in final version
 
-    public Integer deleteData(){
+    public void deleteData(){
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(TABLE_NAME, null, new String[]{});
+        db.delete(TABLE_NAME, null, new String[]{});
     }
 }
