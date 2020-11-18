@@ -95,21 +95,40 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
         db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
 
-    public void deleteCollection(String id) {
+    public void deleteCollection(String id, int position) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
-        db.delete(TABLE_NAME, "id = ?", new String[]{id});
-        int Id = Integer.parseInt(id) - 1;
-        cursor.move(Integer.parseInt(id));
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COL_1, Integer.toString(Id));
-        db.update(TABLE_NAME, contentValues, COL_1 + "= ?", new String[]{Integer.toString(Id)});
-        while (cursor.moveToNext()) {
-            Id = Id + 1;
-            contentValues = new ContentValues();
-            contentValues.put(COL_1, Integer.toString(Id));
-            db.update(TABLE_NAME, contentValues, COL_1 + "= ?", new String[]{Integer.toString(Id + 1)});
+        List<String> translations = new LinkedList<>();
+        List<String> words = new LinkedList<>();
+        translations = getTranslationList(translations, Integer.parseInt(id));
+        words = getWordsList(words, Integer.parseInt(id));
+        String translation = "";
+        String word = "";
+        if(words.size() <= position)
+            words.add(word);
+        if(translations.size() <= position)
+            translations.add(translation);
+        words.remove(position);
+        translations.remove(position);
+        for(String i : translations){
+            if(translation.equals(""))
+                translation = translation + i;
+            else
+                translation = translation + " " + i;
         }
+        for(String i : words){
+            if(word.equals(""))
+                word = word + i;
+            else
+                word = word + " " + i;
+        }
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_1, id);
+        contentValues.put(COL_2, word);
+        contentValues.put(COL_3, translation);
+        if(word.equals("") || translation.equals(""))
+            db.delete(TABLE_NAME, "id = ?", new String[]{id});
+        else
+            db.update(TABLE_NAME, contentValues, "id = ?", new String[]{id});
     }
 
     public Integer deleteData() {
@@ -159,4 +178,3 @@ public class CollectionDatabase_SQL extends SQLiteOpenHelper {
         return translations;
     }
 }
-

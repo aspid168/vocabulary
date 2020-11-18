@@ -27,7 +27,7 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
     public Context mcontext;
     public CollectionDatabase_SQL databaseSql;
     public List<Boolean> state = new LinkedList<>();
-    public Boolean statement_add = true;
+    public List<Boolean> statement_add = new LinkedList<>();
 
 
     public AdapterForCollections(Context context, int pos) {
@@ -37,12 +37,16 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         databaseSql = new CollectionDatabase_SQL(mcontext);
         words = databaseSql.getWordsList(words, pos);
         translations = databaseSql.getTranslationList(translations, pos);
+        if(words.size() == 0 || translations.size() == 0)
+            statement_add.add(true);
         while (words.size() < translations.size())
             words.add("");
         while (translations.size() < words.size())
             translations.add("");
         while (state.size() < words.size())
             state.add(false);
+        while (statement_add.size() < words.size())
+            statement_add.add(true);
     }
 
 
@@ -76,6 +80,7 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         final TextView textView_w_invisible = ((CollectionsViewHolder)holder).word_invisible;
         final TextView textView_t_invisible = ((CollectionsViewHolder)holder).translation_invisible;
         final ImageButton delete = ((CollectionsViewHolder)holder).delete;
+        Log.v("qwe", state + "state//words" + words + "words//trans" + translations + "trans//pos" + position + "pos//size" + words.size());
         if (state.get(position)) {
             textView_w.setText(words.get(position));
             textView_t.setText(translations.get(position));
@@ -98,8 +103,10 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
             @Override
             public boolean onLongClick(View v) {
                 if(!textView_t.getText().toString().isEmpty() && !textView_w.getText().toString().isEmpty()){
-                    statement_add = true;
+                    statement_add.set(position, true);
                     state.set(position, false);
+                    words.set(position, textView_w.getText().toString());
+                    translations.set(position, textView_t.getText().toString());
                     databaseSql.updateWord(Integer.toString(pos), textView_w.getText().toString(), position);
                     databaseSql.updateTranslation(Integer.toString(pos), textView_t.getText().toString(), position);
                     textView_w_invisible.setText(textView_w.getText().toString());
@@ -121,8 +128,10 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
             @Override
             public boolean onLongClick(View v) {
                 if(!textView_t.getText().toString().isEmpty() && !textView_w.getText().toString().isEmpty()){
-                    statement_add = true;
+                    statement_add.set(position, true);
                     state.set(position, false);
+                    words.set(position, textView_w.getText().toString());
+                    translations.set(position, textView_t.getText().toString());
                     databaseSql.updateWord(Integer.toString(pos), textView_w.getText().toString(), position);
                     databaseSql.updateTranslation(Integer.toString(pos), textView_t.getText().toString(), position);
                     textView_w_invisible.setText(textView_w.getText().toString());
@@ -144,6 +153,7 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         textView_w_invisible.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                statement_add.set(position, false);
                 state.set(position, true);
                 textView_w.setText(textView_w_invisible.getText().toString());
                 textView_t.setText(textView_t_invisible.getText().toString());
@@ -158,6 +168,7 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         textView_t_invisible.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                statement_add.set(position, false);
                 state.set(position, true);
                 textView_w.setText(textView_w_invisible.getText().toString());
                 textView_t.setText(textView_t_invisible.getText().toString());
@@ -173,24 +184,28 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseSql.deleteData();
-//                elements = elements - 1;
-//                databaseSql.deleteCollection(Integer.toString(position));
-//                if(elements == 0)
-//                    databaseSql.deleteData();
-//                notifyItemRemoved(position);
-//                notifyItemRangeChanged(position, collections.size());
+                words.remove(position);
+                translations.remove(position);
+                state.remove(position);
+                statement_add.remove(position);
+                if(!textView_t.getText().toString().isEmpty() && !textView_w.getText().toString().isEmpty()){
+                    databaseSql.deleteCollection(Integer.toString(pos), position);
+                }
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, words.size());
             }
         });
     }
 
     public void add(){
-        if(statement_add) {
+        if(statement_add.get(statement_add.size() - 1) || words.size() == 0) {
             words.add("");
+            if(words.size() == 1)
+                statement_add.remove(0);
+            statement_add.add(false);
             translations.add("");
             state.add(true);
             notifyItemInserted(words.size());
-            statement_add = false;
         }
         else
         {
