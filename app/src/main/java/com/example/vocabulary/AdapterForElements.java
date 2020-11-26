@@ -18,11 +18,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    public  int elements;
-    String element_from_db = "";
-    public Context mcontext;
-    public ElementDatabase_SQL databaseSql;
-    public CollectionDatabase_SQL collectionDatabaseSql;
+    private   int elements;
+    private String element_from_db = "";
+    private final Context mcontext;
+    private final ElementDatabase_SQL databaseSql;
+    private final CollectionDatabase_SQL collectionDatabaseSql;
 
     public AdapterForElements(Context context) {
         mcontext = context;
@@ -35,9 +35,9 @@ public class AdapterForElements extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     static class ElementsViewHolder extends RecyclerView.ViewHolder {
-        private TextView elem_edit;
-        private TextView elem_text;
-        private ImageButton elem_delete;
+        private final TextView elem_edit;
+        private final TextView elem_text;
+        private final ImageButton elem_delete;
         public ElementsViewHolder(@NonNull View itemView) {
             super(itemView);
             elem_edit = itemView.findViewById(R.id.edit);

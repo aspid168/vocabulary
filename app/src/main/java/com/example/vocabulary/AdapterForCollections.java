@@ -14,13 +14,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    public int pos;
-    public List<String> words = new LinkedList<>();
-    public List<String> translations = new LinkedList<>();
-    public Context mcontext;
-    public CollectionDatabase_SQL databaseSql;
-    public List<Boolean> state = new LinkedList<>();
-    public List<Boolean> statement_add = new LinkedList<>();
+    private final int pos;
+    private List<String> words = new LinkedList<>();
+    private List<String> translations = new LinkedList<>();
+    private final Context mcontext;
+    private final CollectionDatabase_SQL databaseSql;
+    private final List<Boolean> state = new LinkedList<>();
+    private final List<Boolean> statement_add = new LinkedList<>();
 
 
     public AdapterForCollections(Context context, int pos) {
@@ -42,11 +42,11 @@ public class AdapterForCollections extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     static class CollectionsViewHolder extends RecyclerView.ViewHolder{
-        private TextView word;
-        private TextView translation;
-        private TextView word_invisible;
-        private TextView translation_invisible;
-        private ImageButton delete;
+        private final TextView word;
+        private final TextView translation;
+        private final TextView word_invisible;
+        private final TextView translation_invisible;
+        private final ImageButton delete;
         public CollectionsViewHolder(@NonNull View itemView) {
             super(itemView);
             word = itemView.findViewById(R.id.editTextWord);
